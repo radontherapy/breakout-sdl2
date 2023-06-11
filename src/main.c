@@ -16,7 +16,7 @@
 
 // - Game settings
 #define BALL_SIZE 20
-#define BALL_SPEED 2
+#define BALL_SPEED 5
 
 #define PADDLE_W 120
 #define PADDLE_H 20
@@ -84,7 +84,7 @@ void game_exit()
 
 void breakout_init()
 {
-    player = (Object) {(SDL_Rect){(WINDOW_WIDTH - PADDLE_W) / 2, WINDOW_HEIGHT - PADDLE_H - 20, PADDLE_W, PADDLE_H}, PADDLE_SPEED, PADDLE_SPEED};
+    player = (Object) {(SDL_Rect){(WINDOW_WIDTH - PADDLE_W) / 2, WINDOW_HEIGHT - PADDLE_H - 20, PADDLE_W, PADDLE_H}, 0, 0};
     ball = (Object) {(SDL_Rect){(WINDOW_WIDTH - BALL_SIZE) / 2, WINDOW_HEIGHT - BALL_SIZE - PADDLE_H - 20 - 20, BALL_SIZE, BALL_SIZE}, BALL_SPEED, BALL_SPEED};
 }
 
@@ -98,6 +98,36 @@ void handle_input()
                 gExit = true;
                 break;
 
+            case SDL_KEYDOWN:
+                switch (event.key.keysym.sym) {
+                    case SDLK_LEFT:
+                    case SDLK_a:
+                        player.dx = -PADDLE_SPEED;
+                        break;
+
+                    case SDLK_RIGHT:
+                    case SDLK_d:
+                        player.dx = PADDLE_SPEED;
+                        break;
+
+                    default:
+                        break;
+                }
+                break;
+
+            case SDL_KEYUP:
+                switch (event.key.keysym.sym) {
+                    case SDLK_LEFT:
+                    case SDLK_a:
+                    case SDLK_RIGHT:
+                    case SDLK_d:
+                        player.dx = 0;
+                        break;
+
+                    default:
+                        break;
+                }
+
             default:
                 break;
         }
@@ -106,6 +136,22 @@ void handle_input()
 
 void game_update()
 {
+    // Move paddle
+    player.rect.x += player.dx;
+    player.rect.y += player.dy;
+
+    if (player.rect.x + player.rect.w > WINDOW_WIDTH) {
+        player.rect.x = WINDOW_WIDTH - player.rect.w;
+    } else if (player.rect.x < 0) {
+        player.rect.x = 0;
+    }
+
+    // Move ball
+    ball.rect.x += ball.dx;
+    ball.rect.y += ball.dy;
+
+    ball.dx = ball.rect.x < 0 || ball.rect.x > WINDOW_WIDTH - ball.rect.w ? -ball.dx : ball.dx;
+    ball.dy = ball.rect.y < 0 || ball.rect.y > WINDOW_HEIGHT - ball.rect.h ? -ball.dy : ball.dy;
 }
 
 void game_render()
