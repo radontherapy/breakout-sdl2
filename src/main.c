@@ -14,6 +14,14 @@
 #define WINDOW_HEIGHT 600
 #define FRAME_DELAY_MS (1000 / 60) // 60 FPS
 
+// - Game settings
+#define BALL_SIZE 20
+#define BALL_SPEED 2
+
+#define PADDLE_W 120
+#define PADDLE_H 20
+#define PADDLE_SPEED 3
+
 // - SDL variables
 SDL_Window* gWindow = NULL;
 SDL_Renderer* gRenderer = NULL;
@@ -21,6 +29,13 @@ TTF_Font* gFont = NULL;
 
 // - Game variables
 bool gExit = false;
+
+typedef struct {
+    SDL_Rect rect;
+    int dx, dy;
+} Object;
+
+Object player, ball;
 
 // Functions
 bool game_init()
@@ -67,6 +82,12 @@ void game_exit()
     SDL_Quit();
 }
 
+void breakout_init()
+{
+    player = (Object) {(SDL_Rect){(WINDOW_WIDTH - PADDLE_W) / 2, WINDOW_HEIGHT - PADDLE_H - 20, PADDLE_W, PADDLE_H}, PADDLE_SPEED, PADDLE_SPEED};
+    ball = (Object) {(SDL_Rect){(WINDOW_WIDTH - BALL_SIZE) / 2, WINDOW_HEIGHT - BALL_SIZE - PADDLE_H - 20 - 20, BALL_SIZE, BALL_SIZE}, BALL_SPEED, BALL_SPEED};
+}
+
 void handle_input()
 {
     SDL_Event event;
@@ -83,11 +104,24 @@ void handle_input()
     }
 }
 
+void game_update()
+{
+}
+
 void game_render()
 {
     // Clean up screen
     SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
     SDL_RenderClear(gRenderer);
+
+    // White
+    SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+
+    // Paddle
+    SDL_RenderFillRect(gRenderer, &player.rect);
+
+    // Ball
+    SDL_RenderFillRect(gRenderer, &ball.rect);
 
     // Render
     SDL_RenderPresent(gRenderer);
@@ -100,6 +134,9 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    // Initialize game
+    breakout_init();
+
     // Initialize fps cap
     Uint32 frameStart, frameTime;
 
@@ -107,8 +144,8 @@ int main(int argc, char* argv[])
         // Set start time for fps cap
         frameStart = SDL_GetTicks();
 
-        // Input handling
-        handle_input();
+        handle_input(); // Input handling
+        game_update(); // Handle game dynamics
 
         // Rendering
         game_render();
