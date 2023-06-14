@@ -20,7 +20,7 @@
 
 #define PADDLE_W 120
 #define PADDLE_H 20
-#define PADDLE_SPEED 3
+#define PADDLE_SPEED 5
 
 #define COUNT_COLUMN 8
 #define COUNT_ROW 10
