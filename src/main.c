@@ -22,6 +22,9 @@
 #define PADDLE_H 20
 #define PADDLE_SPEED 3
 
+#define COUNT_COLUMN 5
+#define COUNT_ROW 5
+
 // - SDL variables
 SDL_Window* gWindow = NULL;
 SDL_Renderer* gRenderer = NULL;
@@ -36,6 +39,13 @@ typedef struct {
 } Object;
 
 Object player, ball;
+
+typedef struct {
+    SDL_Rect rect;
+    bool visible;
+} Brick;
+
+Brick bricks[COUNT_ROW][COUNT_COLUMN];
 
 // Functions
 bool game_init()
@@ -96,6 +106,19 @@ void breakout_init()
 {
     player = (Object) {(SDL_Rect){(WINDOW_WIDTH - PADDLE_W) / 2, WINDOW_HEIGHT - PADDLE_H - 20, PADDLE_W, PADDLE_H}, 0, 0};
     ball = (Object) {(SDL_Rect){(WINDOW_WIDTH - BALL_SIZE) / 2, WINDOW_HEIGHT - BALL_SIZE - PADDLE_H - 20 - 20, BALL_SIZE, BALL_SIZE}, BALL_SPEED, -BALL_SPEED};
+
+    int brickWidth = WINDOW_WIDTH / COUNT_COLUMN;
+    int brickHeight = WINDOW_HEIGHT / 2 / COUNT_ROW;
+
+    for (int i = 0; i < COUNT_ROW; i++) {
+        for (int j = 0; j < COUNT_COLUMN; j++) {
+            bricks[i][j].rect.x = j * brickWidth + 2;
+            bricks[i][j].rect.y = i * brickHeight + 2;
+            bricks[i][j].rect.w = brickWidth;
+            bricks[i][j].rect.h = brickHeight;
+            bricks[i][j].visible = true;
+        }
+    }
 }
 
 void handle_input()
@@ -164,6 +187,15 @@ void game_update()
     ball.dy = ball.rect.y < 0 || ball.rect.y > WINDOW_HEIGHT - ball.rect.h ? -ball.dy : ball.dy;
 
     ball.dy = check_collision(player.rect, ball.rect) ? -ball.dy : ball.dy;
+
+    for (int i = 0; i < COUNT_ROW; i++) {
+        for (int j = 0; j < COUNT_COLUMN; j++) {
+            if (bricks[i][j].visible && check_collision(ball.rect, bricks[i][j].rect)) {
+                bricks[i][j].visible = false;
+                ball.dy = -ball.dy;
+            }
+        }
+    }
 }
 
 void game_render()
@@ -180,6 +212,14 @@ void game_render()
 
     // Ball
     SDL_RenderFillRect(gRenderer, &ball.rect);
+
+    // Bricks
+    for (int i = 0; i < COUNT_ROW; i++) {
+        for (int j = 0; j < COUNT_COLUMN; j++) {
+            if (bricks[i][j].visible)
+                SDL_RenderFillRect(gRenderer, &bricks[i][j].rect);
+        }
+    }
 
     // Render
     SDL_RenderPresent(gRenderer);
