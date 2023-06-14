@@ -22,8 +22,8 @@
 #define PADDLE_H 20
 #define PADDLE_SPEED 3
 
-#define COUNT_COLUMN 5
-#define COUNT_ROW 5
+#define COUNT_COLUMN 8
+#define COUNT_ROW 10
 
 // - SDL variables
 SDL_Window* gWindow = NULL;
@@ -107,6 +107,7 @@ void breakout_init()
     player = (Object) {(SDL_Rect){(WINDOW_WIDTH - PADDLE_W) / 2, WINDOW_HEIGHT - PADDLE_H - 20, PADDLE_W, PADDLE_H}, 0, 0};
     ball = (Object) {(SDL_Rect){(WINDOW_WIDTH - BALL_SIZE) / 2, WINDOW_HEIGHT - BALL_SIZE - PADDLE_H - 20 - 20, BALL_SIZE, BALL_SIZE}, BALL_SPEED, -BALL_SPEED};
 
+    // Bricks
     int brickWidth = WINDOW_WIDTH / COUNT_COLUMN;
     int brickHeight = WINDOW_HEIGHT / 2 / COUNT_ROW;
 
@@ -188,6 +189,7 @@ void game_update()
 
     ball.dy = check_collision(player.rect, ball.rect) ? -ball.dy : ball.dy;
 
+    // Bricks
     for (int i = 0; i < COUNT_ROW; i++) {
         for (int j = 0; j < COUNT_COLUMN; j++) {
             if (bricks[i][j].visible && check_collision(ball.rect, bricks[i][j].rect)) {
@@ -216,8 +218,7 @@ void game_render()
     // Bricks
     for (int i = 0; i < COUNT_ROW; i++) {
         for (int j = 0; j < COUNT_COLUMN; j++) {
-            if (bricks[i][j].visible)
-                SDL_RenderFillRect(gRenderer, &bricks[i][j].rect);
+            if (bricks[i][j].visible) SDL_RenderFillRect(gRenderer, &bricks[i][j].rect);
         }
     }
 
