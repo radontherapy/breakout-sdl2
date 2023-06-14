@@ -82,10 +82,20 @@ void game_exit()
     SDL_Quit();
 }
 
+bool check_collision(SDL_Rect rect1, SDL_Rect rect2) {
+    if (rect1.x < rect2.x + rect2.w &&
+        rect1.x + rect1.w > rect2.x &&
+        rect1.y < rect2.y + rect2.h &&
+        rect1.y + rect1.h > rect2.y) {
+        return true;
+    }
+    return false;
+}
+
 void breakout_init()
 {
     player = (Object) {(SDL_Rect){(WINDOW_WIDTH - PADDLE_W) / 2, WINDOW_HEIGHT - PADDLE_H - 20, PADDLE_W, PADDLE_H}, 0, 0};
-    ball = (Object) {(SDL_Rect){(WINDOW_WIDTH - BALL_SIZE) / 2, WINDOW_HEIGHT - BALL_SIZE - PADDLE_H - 20 - 20, BALL_SIZE, BALL_SIZE}, BALL_SPEED, BALL_SPEED};
+    ball = (Object) {(SDL_Rect){(WINDOW_WIDTH - BALL_SIZE) / 2, WINDOW_HEIGHT - BALL_SIZE - PADDLE_H - 20 - 20, BALL_SIZE, BALL_SIZE}, BALL_SPEED, -BALL_SPEED};
 }
 
 void handle_input()
@@ -152,6 +162,8 @@ void game_update()
 
     ball.dx = ball.rect.x < 0 || ball.rect.x > WINDOW_WIDTH - ball.rect.w ? -ball.dx : ball.dx;
     ball.dy = ball.rect.y < 0 || ball.rect.y > WINDOW_HEIGHT - ball.rect.h ? -ball.dy : ball.dy;
+
+    ball.dy = check_collision(player.rect, ball.rect) ? -ball.dy : ball.dy;
 }
 
 void game_render()
