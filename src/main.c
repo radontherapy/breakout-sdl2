@@ -1,5 +1,5 @@
 // Breakout SDL2 by Radon Therapy
-// 2023-06-08 - 
+// 2023-06-08 - 2023-06-15
 
 // Header files
 #include <stdio.h>
