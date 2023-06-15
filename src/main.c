@@ -109,7 +109,7 @@ void breakout_init()
     // Game variables
     gFinished = false;
     gWin = false;
-    
+
     // Player and ball
     player = (Object) {(SDL_Rect){(WINDOW_WIDTH - PADDLE_W) / 2, WINDOW_HEIGHT - PADDLE_H - 20, PADDLE_W, PADDLE_H}, 0, 0};
     ball = (Object) {(SDL_Rect){(WINDOW_WIDTH - BALL_SIZE) / 2, WINDOW_HEIGHT - BALL_SIZE - PADDLE_H - 20 - 20, BALL_SIZE, BALL_SIZE}, BALL_SPEED, -BALL_SPEED};
@@ -206,13 +206,11 @@ void game_update()
     if (ball.rect.y < 0) {
         gFinished = true;
         gWin = true;
-        printf("WIN!\n");
     }
 
     if (ball.rect.y > WINDOW_HEIGHT - ball.rect.h) {
         gFinished = true;
         gWin = false;
-        printf("LOSE!\n");
     }
 
     // Bricks
@@ -247,6 +245,30 @@ void game_render()
             if (bricks[i][j].visible) SDL_RenderFillRect(gRenderer, &bricks[i][j].rect);
         }
     }
+
+    // Win/lose text
+    SDL_Color textColor = { 255, 255, 255, 255 };
+
+    SDL_Surface* textSurface = TTF_RenderText_Solid(gFont, "You win! Press <SPACE> to restart.", textColor);
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(gRenderer, textSurface);
+    SDL_Rect textRect = (SDL_Rect) {WINDOW_WIDTH / 2 - 20 - textSurface->w, WINDOW_HEIGHT / 2, textSurface->w, textSurface->h };
+
+    // Draw win text
+    if (gFinished) {
+        if (gWin) {
+            SDL_RenderCopy(gRenderer, textTexture, NULL, &textRect);
+        } else {
+            textSurface = TTF_RenderText_Solid(gFont, "You lose. Press <SPACE> to restart.", textColor);
+            textTexture = SDL_CreateTextureFromSurface(gRenderer, textSurface);
+            textRect = (SDL_Rect) {WINDOW_WIDTH / 2 + 20, WINDOW_HEIGHT / 2, textSurface->w, textSurface->h };
+            SDL_RenderCopy(gRenderer, textTexture, NULL, &textRect);
+        }
+    }
+    
+
+    SDL_DestroyTexture(textTexture);
+    SDL_FreeSurface(textSurface);
+
 
     // Render
     SDL_RenderPresent(gRenderer);
