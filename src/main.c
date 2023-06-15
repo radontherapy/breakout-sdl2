@@ -22,7 +22,7 @@
 #define PADDLE_H 20
 #define PADDLE_SPEED 5
 
-#define COUNT_COLUMN 8
+#define COUNT_COLUMN 10
 #define COUNT_ROW 10
 
 // - SDL variables
@@ -32,6 +32,8 @@ TTF_Font* gFont = NULL;
 
 // - Game variables
 bool gExit = false;
+bool gFinished = false;
+bool gWin = false;
 
 typedef struct {
     SDL_Rect rect;
@@ -104,12 +106,17 @@ bool check_collision(SDL_Rect rect1, SDL_Rect rect2) {
 
 void breakout_init()
 {
+    // Game variables
+    gFinished = false;
+    gWin = false;
+    
+    // Player and ball
     player = (Object) {(SDL_Rect){(WINDOW_WIDTH - PADDLE_W) / 2, WINDOW_HEIGHT - PADDLE_H - 20, PADDLE_W, PADDLE_H}, 0, 0};
     ball = (Object) {(SDL_Rect){(WINDOW_WIDTH - BALL_SIZE) / 2, WINDOW_HEIGHT - BALL_SIZE - PADDLE_H - 20 - 20, BALL_SIZE, BALL_SIZE}, BALL_SPEED, -BALL_SPEED};
 
     // Bricks
     int brickWidth = WINDOW_WIDTH / COUNT_COLUMN;
-    int brickHeight = WINDOW_HEIGHT / 2 / COUNT_ROW;
+    int brickHeight = (WINDOW_HEIGHT - 400) / COUNT_ROW;
 
     for (int i = 0; i < COUNT_ROW; i++) {
         for (int j = 0; j < COUNT_COLUMN; j++) {
@@ -144,6 +151,10 @@ void handle_input()
                         player.dx = PADDLE_SPEED;
                         break;
 
+                    case SDLK_SPACE:
+                        breakout_init();
+                        break;
+
                     default:
                         break;
                 }
@@ -170,6 +181,8 @@ void handle_input()
 
 void game_update()
 {
+    if (gFinished) return;
+
     // Move paddle
     player.rect.x += player.dx;
     player.rect.y += player.dy;
@@ -188,6 +201,19 @@ void game_update()
     ball.dy = ball.rect.y < 0 || ball.rect.y > WINDOW_HEIGHT - ball.rect.h ? -ball.dy : ball.dy;
 
     ball.dy = check_collision(player.rect, ball.rect) ? -ball.dy : ball.dy;
+
+    // Game finish win/lose
+    if (ball.rect.y < 0) {
+        gFinished = true;
+        gWin = true;
+        printf("WIN!\n");
+    }
+
+    if (ball.rect.y > WINDOW_HEIGHT - ball.rect.h) {
+        gFinished = true;
+        gWin = false;
+        printf("LOSE!\n");
+    }
 
     // Bricks
     for (int i = 0; i < COUNT_ROW; i++) {
